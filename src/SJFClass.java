@@ -19,7 +19,6 @@ class Process {
 }
 
 public class SJFClass {
-    public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter the number of processes: ");
@@ -107,5 +106,4 @@ public class SJFClass {
         System.out.printf("CPU Utilization: %.2f%%\n", cpuUtilization);
 
         scanner.close();
-    }
 }
