@@ -1,4 +1,4 @@
-import java.util.Scanner;
+import java.util.*;
 
 public class Scheduling {
     private static Scanner scanner = new Scanner(System.in);
