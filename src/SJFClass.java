@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Scanner;
 
 class Process {
     String pid;
@@ -19,25 +18,16 @@ class Process {
 }
 
 public class SJFClass {
-        Scanner scanner = new Scanner(System.in);
+    private ArrayList<Process> processes = new ArrayList<>();
+    private ArrayList<Process> sortedProcesses = new ArrayList<>();
 
-        System.out.print("Enter the number of processes: ");
-        int n = scanner.nextInt();
-        ArrayList<Process> processes = new ArrayList<>();
-        ArrayList<Process> sortedProcesses = new ArrayList<>();
+    public void addProcess(String pid, int arrivalTime, int burstTime) {
+        Process process = new Process(pid, arrivalTime, burstTime);
+        processes.add(process);
+        sortedProcesses.add(process);
+    }
 
-        for (int i = 0; i < n; i++) {
-            String pid = String.valueOf((char) ('A' + i));
-            System.out.print("Enter arrival time of process " + pid + ": ");
-            int arrivalTime = scanner.nextInt();
-            System.out.print("Enter burst time of process " + pid + ": ");
-            int burstTime = scanner.nextInt();
-            Process process = new Process(pid, arrivalTime, burstTime);
-            processes.add(process);
-            sortedProcesses.add(process);
-        }
-
-        // Sort processes by arrival time
+    public void calculateSchedule() {
         sortedProcesses.sort(Comparator.comparingInt(p -> p.arrivalTime));
 
         int currentTime = 0;
@@ -85,6 +75,10 @@ public class SJFClass {
         ganttChartTop.append("+");
         ganttChartBottom.append("|");
 
+        displayResults(totalTurnaroundTime, totalWaitingTime, idleTime, currentTime, ganttChartTop, ganttChartBottom, ganttChartTime);
+    }
+
+    private void displayResults(int totalTurnaroundTime, int totalWaitingTime, int idleTime, int currentTime, StringBuilder ganttChartTop, StringBuilder ganttChartBottom, StringBuilder ganttChartTime) {
         System.out.println("\nProcess Table:");
         System.out.println("PID\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time");
         for (Process p : processes) {
@@ -97,13 +91,12 @@ public class SJFClass {
         System.out.println(ganttChartTop.toString());
         System.out.println(ganttChartTime.toString());
 
-        double avgTurnaroundTime = (double) totalTurnaroundTime / n;
-        double avgWaitingTime = (double) totalWaitingTime / n;
+        double avgTurnaroundTime = (double) totalTurnaroundTime / processes.size();
+        double avgWaitingTime = (double) totalWaitingTime / processes.size();
         double cpuUtilization = ((currentTime - idleTime) / (double) currentTime) * 100;
 
         System.out.printf("\nAverage Turnaround Time: %.2f ms\n", avgTurnaroundTime);
         System.out.printf("Average Waiting Time: %.2f ms\n", avgWaitingTime);
         System.out.printf("CPU Utilization: %.2f%%\n", cpuUtilization);
-
-        scanner.close();
+    }
 }
