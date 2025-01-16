@@ -7,6 +7,7 @@ class Process {
     int completionTime;
     int turnAroundTime;
     int waitingTime;
+    public int startTime;
 
     public Process(String processID, int arrivalTime, int burstTime) {
         this.processID = processID;

@@ -26,18 +26,20 @@ public class Scheduling {
                 continue;
             }
 
-            // get number of processes
+            // Get number of processes
             System.out.print("\nEnter number of processes (1-10): ");
             int n = getValidChoice(1, 10);
 
-            // arrays to store process details
+            // Arrays to store process details
+            String[] processID = new String[n];  // To store auto-incremented process IDs
             int[] arrivalTime = new int[n];
             int[] burstTime = new int[n];
             int[] priority = new int[n];
 
-            // input process details
+            // Automatically assign process names (A, B, C, ...)
             for (int i = 0; i < n; i++) {
-                System.out.println("\nProcess " + (i + 1) + ":");
+                processID[i] = String.valueOf((char) ('A' + i)); // Assigning 'A', 'B', 'C', ...
+                System.out.println("\nProcess " + processID[i] + ":");
                 System.out.print("Arrival Time: ");
                 arrivalTime[i] = getValidNonNegativeInput();
                 System.out.print("Burst Time: ");
@@ -48,6 +50,8 @@ public class Scheduling {
                     priority[i] = getValidNonNegativeInput();
                 }
             }
+
+            System.out.println();
 
             // process the selected algorithm
             try {
@@ -63,7 +67,15 @@ public class Scheduling {
                         fcfs.execute();
                         break;
                     case 2:
-                        System.out.println(""); // SJF d2
+                        SJFClass sjf = new SJFClass();
+
+                        // Add processes with the collected arrival times and burst times
+                        for (int i = 0; i < n; i++) {
+                            sjf.addProcess(processID[i], arrivalTime[i], burstTime[i]);
+                        }
+
+                        // Execute the scheduling algorithm
+                        sjf.execute();
                         break;
                     case 3:
                         // srtf
@@ -107,7 +119,7 @@ public class Scheduling {
                 System.out.println("\nAn error occurred: " + e.getMessage());
             }
 
-            // ask if user wants to continue
+            // Ask if user wants to continue
             System.out.print("\nDo you want to try another scheduling algorithm? (y/n): ");
             String response = scanner.next().trim().toLowerCase();
             if (response.equals("n")) {
@@ -118,7 +130,7 @@ public class Scheduling {
         scanner.close();
     }
 
-    // helper method to get valid choice within a range
+    // Helper method to get valid choice within a range
     private static int getValidChoice(int min, int max) {
         int choice;
         while (true) {
@@ -131,12 +143,12 @@ public class Scheduling {
                 }
             } catch (java.util.InputMismatchException e) {
                 System.out.print("Invalid input. Please enter a number between " + min + " and " + max + ": ");
-                scanner.next(); // clear invalid input
+                scanner.next(); // Clear invalid input
             }
         }
     }
 
-    // helper method to get valid non-negative input
+    // Helper method to get valid non-negative input
     private static int getValidNonNegativeInput() {
         int input;
         while (true) {
@@ -149,12 +161,12 @@ public class Scheduling {
                 }
             } catch (java.util.InputMismatchException e) {
                 System.out.print("Invalid input. Please enter a non-negative number: ");
-                scanner.next(); // clear invalid input
+                scanner.next(); // Clear invalid input
             }
         }
     }
 
-    // helper method to get valid positive input
+    // Helper method to get valid positive input
     private static int getValidPositiveInput() {
         int input;
         while (true) {
@@ -167,7 +179,7 @@ public class Scheduling {
                 }
             } catch (java.util.InputMismatchException e) {
                 System.out.print("Invalid input. Please enter a positive number: ");
-                scanner.next(); // clear invalid input
+                scanner.next(); // Clear invalid input
             }
         }
     }
