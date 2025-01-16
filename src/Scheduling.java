@@ -78,7 +78,16 @@ public class Scheduling {
                         System.out.println(""); // priority (non-preemptive) d2
                         break;
                     case 5:
-                        System.out.println(""); // priority (preemptive) d2
+                        // Priority (Preemptive) Scheduling
+                        PreemptivePriority pp = new PreemptivePriority();
+
+                        // Add processes to PreemptivePriority
+                        for (int i = 0; i < n; i++) {
+                            pp.addProcess(arrivalTime[i], burstTime[i], priority[i]);
+                        }
+
+                        // Execute the scheduling algorithm
+                        pp.execute();
                         break;
                     case 6:
                         System.out.print("\nEnter Time Quantum (positive integer): ");
