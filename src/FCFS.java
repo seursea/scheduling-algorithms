@@ -15,7 +15,7 @@ class Process {
     }
 }
 
-class FCFS {
+public class FCFS {
     private List<Process> processes;
 
     public FCFS() {
@@ -32,66 +32,103 @@ class FCFS {
     }
 
     public void execute() {
+        // Create a copy of processes for sorting and scheduling
         List<Process> sortedProcesses = new ArrayList<>(processes);
-
         sortedProcesses.sort(Comparator.comparingInt(p -> p.arrivalTime));
 
-        int currentTime = 0, totalWaitTime = 0, totalTurnAroundTime = 0, totalBurstTime = 0;
+        int currentTime = 0;
+        int totalWaitTime = 0, totalTurnAroundTime = 0;
+
+        List<String> ganttChart = new ArrayList<>();
+        List<Integer> timeMarkers = new ArrayList<>();
+        timeMarkers.add(currentTime); // Initialize first time marker
+
         for (Process p : sortedProcesses) {
             if (currentTime < p.arrivalTime) {
+                // Add idle time
+                ganttChart.add("//");
+                timeMarkers.add(p.arrivalTime);
                 currentTime = p.arrivalTime;
             }
-            totalBurstTime += p.burstTime;
+
+            ganttChart.add(p.processID);
             p.completionTime = currentTime + p.burstTime;
             p.turnAroundTime = p.completionTime - p.arrivalTime;
             p.waitingTime = p.turnAroundTime - p.burstTime;
 
-            currentTime = p.completionTime;
             totalWaitTime += p.waitingTime;
             totalTurnAroundTime += p.turnAroundTime;
+
+            currentTime = p.completionTime;
+            timeMarkers.add(currentTime);
         }
 
-        displayResults(totalWaitTime, totalTurnAroundTime, totalBurstTime, currentTime, sortedProcesses);
-    }
-
-    private void displayResults(int totalWaitTime, int totalTurnAroundTime, int totalBurstTime, int currentTime,
-            List<Process> sortedProcesses) {
         double avgWaitTime = (double) totalWaitTime / processes.size();
         double avgTurnaroundTime = (double) totalTurnAroundTime / processes.size();
-        double cpuUtilization = ((double) totalBurstTime / currentTime) * 100;
+        double cpuUtilization = ((double) (currentTime
+                - processes.stream().mapToInt(p -> p.arrivalTime).min().orElse(0)) / currentTime) * 100;
 
+        displayResults(avgWaitTime, avgTurnaroundTime, cpuUtilization, ganttChart, timeMarkers);
+    }
+
+    private void displayResults(double avgWaitTime, double avgTurnaroundTime, double cpuUtilization,
+            List<String> ganttChart, List<Integer> timeMarkers) {
+        // Display process table
         System.out.println("\nProcess Table:");
         System.out.printf("%-12s %-14s %-10s %-16s %-18s %-14s\n",
                 "Process ID", "Arrival Time", "Burst Time",
                 "Completion Time", "Turnaround Time", "Waiting Time");
-        for (Process p : processes) {
+
+        for (Process p : processes) { // Use the original order
             System.out.printf("%-12s %-14d %-10d %-16d %-18d %-14d\n",
                     p.processID, p.arrivalTime, p.burstTime,
                     p.completionTime, p.turnAroundTime, p.waitingTime);
         }
 
+        // Display metrics
         System.out.printf("\nAverage Waiting Time: %.2f ms\n", avgWaitTime);
         System.out.printf("Average Turnaround Time: %.2f ms\n", avgTurnaroundTime);
         System.out.printf("CPU Utilization: %.2f%%\n", cpuUtilization);
 
+        // Display Gantt chart
         System.out.println("\nGantt Chart:");
-        StringBuilder ganttChart = new StringBuilder();
-        StringBuilder timeMarkers = new StringBuilder("0");
 
-        int prevCompletionTime = 0;
-        for (Process p : sortedProcesses) {
-            if (prevCompletionTime < p.arrivalTime) {
-                ganttChart.append(String.format("| %-2s ", "//"));
-                timeMarkers.append(String.format("%5d", p.arrivalTime));
-                prevCompletionTime = p.arrivalTime;
-            }
-            ganttChart.append(String.format("| %-2s ", p.processID));
-            timeMarkers.append(String.format("%5d", p.completionTime));
-            prevCompletionTime = p.completionTime;
+        // Top border
+        System.out.print("+");
+        for (int i = 0; i < ganttChart.size(); i++) {
+            System.out.print("--------+");
         }
-        ganttChart.append("|");
+        System.out.println();
 
-        System.out.println(ganttChart);
-        System.out.println(timeMarkers);
+        // Process IDs
+        System.out.print("|");
+        for (String process : ganttChart) {
+            System.out.printf(" %-6s |", process);
+        }
+        System.out.println();
+
+        // Bottom border
+        System.out.print("+");
+        for (int i = 0; i < ganttChart.size(); i++) {
+            System.out.print("--------+");
+        }
+        System.out.println();
+
+        // Time markers
+        for (Integer time : timeMarkers) {
+            System.out.printf("%-9d", time);
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+        FCFS scheduler = new FCFS();
+
+        // Example usage
+        scheduler.addProcess(0, 4);
+        scheduler.addProcess(1, 3);
+        scheduler.addProcess(2, 1);
+
+        scheduler.execute();
     }
 }

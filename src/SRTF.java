@@ -15,7 +15,7 @@ class Process {
     }
 }
 
-class SRTF {
+public class SRTF {
     private List<Process> processes;
 
     public SRTF() {
@@ -47,7 +47,7 @@ class SRTF {
 
         List<String> ganttChart = new ArrayList<>();
         List<Integer> timeMarkers = new ArrayList<>();
-        boolean timeMarkerAdded = false; // To ensure 0 is added only once
+        boolean isIdle = true; // Track if the CPU is idle
 
         while (complete != n) {
             for (int j = 0; j < n; j++) {
@@ -60,16 +60,18 @@ class SRTF {
             }
 
             if (!check) {
-                if (ganttChart.isEmpty() || !ganttChart.get(ganttChart.size() - 1).equals("Idle")) {
-                    ganttChart.add("//");
-                    if (!timeMarkerAdded) {
-                        // timeMarkers.add(0); // Add 0 only once
-                        timeMarkerAdded = true;
-                    }
-                    timeMarkers.add(currentTime);
+                if (isIdle) {
+                    ganttChart.add("//"); // Mark idle time
+                    timeMarkers.add(currentTime); // Mark the start of idle time
+                    isIdle = false; // Mark CPU as idle
                 }
                 currentTime++;
                 continue;
+            }
+
+            if (!isIdle) {
+                isIdle = true; // CPU starts processing
+                timeMarkers.add(currentTime); // Mark the end of idle time
             }
 
             remainingTime[shortest]--;
@@ -92,16 +94,14 @@ class SRTF {
             if (ganttChart.isEmpty()
                     || !ganttChart.get(ganttChart.size() - 1).equals(sortedProcesses.get(shortest).processID)) {
                 ganttChart.add(sortedProcesses.get(shortest).processID);
-                if (!timeMarkerAdded) {
-                    // timeMarkers.add(0); // Add 0 only once
-                    timeMarkerAdded = true;
+                if (timeMarkers.isEmpty() || timeMarkers.get(timeMarkers.size() - 1) != currentTime) {
+                    timeMarkers.add(currentTime); // Add marker only if it is not already present
                 }
-                timeMarkers.add(currentTime);
             }
 
             currentTime++;
         }
-        timeMarkers.add(currentTime);
+        timeMarkers.add(currentTime); // Mark the final time
 
         int totalWaitTime = 0, totalTurnAroundTime = 0, totalBurstTime = 0;
         for (Process p : sortedProcesses) {
@@ -110,42 +110,63 @@ class SRTF {
             totalBurstTime += p.burstTime;
         }
 
-        displayResults(totalWaitTime, totalTurnAroundTime, totalBurstTime, currentTime, sortedProcesses, ganttChart,
-                timeMarkers);
+        displayResults(totalWaitTime, totalTurnAroundTime, totalBurstTime, currentTime,
+                sortedProcesses, ganttChart, timeMarkers);
     }
 
-    private void displayResults(int totalWaitTime, int totalTurnAroundTime, int totalBurstTime, int currentTime,
-            List<Process> sortedProcesses, List<String> ganttChart, List<Integer> timeMarkers) {
+    private void displayResults(int totalWaitTime, int totalTurnAroundTime, int totalBurstTime,
+            int currentTime, List<Process> sortedProcesses,
+            List<String> ganttChart, List<Integer> timeMarkers) {
+
         double avgWaitTime = (double) totalWaitTime / processes.size();
         double avgTurnaroundTime = (double) totalTurnAroundTime / processes.size();
         double cpuUtilization = ((double) totalBurstTime / currentTime) * 100;
 
+        // Display process table
         System.out.println("\nProcess Table:");
         System.out.printf("%-12s %-14s %-10s %-16s %-18s %-14s\n",
                 "Process ID", "Arrival Time", "Burst Time",
                 "Completion Time", "Turnaround Time", "Waiting Time");
+
         for (Process p : processes) {
             System.out.printf("%-12s %-14d %-10d %-16d %-18d %-14d\n",
                     p.processID, p.arrivalTime, p.burstTime,
                     p.completionTime, p.turnAroundTime, p.waitingTime);
         }
 
+        // Display metrics
         System.out.printf("\nAverage Waiting Time: %.2f ms\n", avgWaitTime);
         System.out.printf("Average Turnaround Time: %.2f ms\n", avgTurnaroundTime);
         System.out.printf("CPU Utilization: %.2f%%\n", cpuUtilization);
 
+        // Display Gantt chart
         System.out.println("\nGantt Chart:");
-        StringBuilder ganttChartStr = new StringBuilder();
-        StringBuilder timeMarkersStr = new StringBuilder();
 
-        timeMarkersStr.append(String.format("%-5d", timeMarkers.get(0)));
+        // Top border
+        System.out.print("+");
         for (int i = 0; i < ganttChart.size(); i++) {
-            ganttChartStr.append(String.format("| %-2s ", ganttChart.get(i)));
-            timeMarkersStr.append(String.format("%-5d", timeMarkers.get(i + 1)));
+            System.out.print("--------+");
         }
-        ganttChartStr.append("|");
+        System.out.println();
 
-        System.out.println(ganttChartStr);
-        System.out.println(timeMarkersStr);
+        // Process IDs
+        System.out.print("|");
+        for (String process : ganttChart) {
+            System.out.printf(" %-6s |", process);
+        }
+        System.out.println();
+
+        // Bottom border
+        System.out.print("+");
+        for (int i = 0; i < ganttChart.size(); i++) {
+            System.out.print("--------+");
+        }
+        System.out.println();
+
+        // Time markers
+        for (Integer time : timeMarkers) {
+            System.out.printf("%-9d", time);
+        }
+        System.out.println();
     }
 }
