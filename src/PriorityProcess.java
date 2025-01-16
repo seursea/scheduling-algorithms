@@ -1,0 +1,19 @@
+public class PriorityProcess {
+    String processID;
+    int arrivalTime;
+    int burstTime;
+    int priority;
+    int remainingTime;
+    int startTime = -1;
+    int completionTime;
+    int turnAroundTime;
+    int waitingTime;
+
+    public PriorityProcess(String processID, int arrivalTime, int burstTime, int priority) {
+        this.processID = processID;
+        this.arrivalTime = arrivalTime;
+        this.burstTime = burstTime;
+        this.remainingTime = burstTime;
+        this.priority = priority;
+    }
+}

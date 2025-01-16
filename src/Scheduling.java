@@ -70,7 +70,8 @@ public class Scheduling {
                         SJFClass sjf = new SJFClass();
 
                         // Add processes with the collected arrival times and burst times
-                        for (int i = 0; i < n; i++) {
+                        for (int i = 0; i 
+                        < n; i++) {
                             sjf.addProcess(processID[i], arrivalTime[i], burstTime[i]);
                         }
 
