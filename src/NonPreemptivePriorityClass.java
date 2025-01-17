@@ -1,40 +1,22 @@
 import java.util.ArrayList;
 import java.util.Comparator;
 
-class PriorityProcess {
-    String processID;
-    int arrivalTime;
-    int burstTime;
-    int priority;
-    int startTime = -1;
-    int completionTime;
-    int turnAroundTime;
-    int waitingTime;
-
-    public PriorityProcess(String processID, int arrivalTime, int burstTime, int priority) {
-        this.processID = processID;
-        this.arrivalTime = arrivalTime;
-        this.burstTime = burstTime;
-        this.priority = priority;
-    }
-}
-public class NonPreemptivePriority {
+public class NonPreemptivePriorityClass {
     private ArrayList<PriorityProcess> processes = new ArrayList<>();
     private ArrayList<PriorityProcess> completedProcesses = new ArrayList<>();
 
-    public void addProcess(String processID, int arrivalTime, int burstTime, int priority) {
-        PriorityProcess process = new PriorityProcess(processID, arrivalTime, burstTime, priority);
+    public void addProcess(String processID, int priority, int arrivalTime, int burstTime) {
+        PriorityProcess process = new PriorityProcess(processID, priority, arrivalTime, burstTime);
         processes.add(process);
     }
 
-    public void addProcess(int arrivalTime, int burstTime, int priority) {
+    public void addProcess(int priority, int arrivalTime, int burstTime) {
         String processID = String.valueOf((char) ('A' + processes.size()));
-        addProcess(processID, arrivalTime, burstTime, priority);
+        addProcess(processID, priority, arrivalTime, burstTime);
     }
 
     public void execute() {
-        // Sort processes by arrival time
-        processes.sort(Comparator.comparingInt(p -> p.arrivalTime));
+        ArrayList<PriorityProcess> inputOrderProcesses = new ArrayList<>(processes); // To retain input order for printing
 
         int currentTime = 0;
         int totalTurnaroundTime = 0;
@@ -46,17 +28,23 @@ public class NonPreemptivePriority {
         StringBuilder ganttChartTime = new StringBuilder("0");
 
         while (!processes.isEmpty()) {
-            // Select the highest priority process from arrived processes
+            // Select the highest priority process available at current time
+            final int currentTimeFinal = currentTime;
             PriorityProcess currentProcess = processes.stream()
-                .filter(p -> p.arrivalTime <= currentTime)
+                .filter(p -> p.arrivalTime <= currentTimeFinal)
                 .min(Comparator.comparingInt((PriorityProcess p) -> p.priority)
-                    .thenComparingInt(p -> p.processID.charAt(0)))
+                    .thenComparingInt(p -> p.arrivalTime)) // Tie-breaking by arrival time
                 .orElse(null);
 
             if (currentProcess != null) {
                 processes.remove(currentProcess);
 
                 // Start executing the process
+                if (currentTime < currentProcess.arrivalTime) {
+                    idleTime += currentProcess.arrivalTime - currentTime;
+                    currentTime = currentProcess.arrivalTime;
+                }
+
                 currentProcess.startTime = currentTime;
                 currentTime += currentProcess.burstTime;
                 currentProcess.completionTime = currentTime;
@@ -73,12 +61,12 @@ public class NonPreemptivePriority {
                 // Update Gantt chart
                 ganttChartTop.append("+-----");
                 ganttChartBottom.append("|  ").append(currentProcess.processID).append("  ");
-                ganttChartTime.append(String.format("%5d", currentTime));
+                ganttChartTime.append(String.format("%6d", currentTime));
             } else {
                 // Idle time if no process is ready
                 ganttChartTop.append("+-----");
                 ganttChartBottom.append("| /// ");
-                ganttChartTime.append(String.format("%5d", currentTime + 1));
+                ganttChartTime.append(String.format("%6d", currentTime + 1));
                 idleTime++;
                 currentTime++;
             }
@@ -88,15 +76,21 @@ public class NonPreemptivePriority {
         ganttChartBottom.append("|");
 
         // Display results
-        displayResults(totalTurnaroundTime, totalWaitingTime, idleTime, currentTime, ganttChartTop, ganttChartBottom, ganttChartTime);
+        displayResults(inputOrderProcesses, totalTurnaroundTime, totalWaitingTime, idleTime, currentTime, ganttChartTop, ganttChartBottom, ganttChartTime);
     }
 
-    private void displayResults(int totalTurnaroundTime, int totalWaitingTime, int idleTime, int currentTime, StringBuilder ganttChartTop, StringBuilder ganttChartBottom, StringBuilder ganttChartTime) {
+    private void displayResults(ArrayList<PriorityProcess> inputOrderProcesses, int totalTurnaroundTime, int totalWaitingTime, int idleTime, int currentTime, StringBuilder ganttChartTop, StringBuilder ganttChartBottom, StringBuilder ganttChartTime) {
         System.out.println("\nProcess Table:");
-        System.out.println("Process\tArrival Time\tBurst Time\tPriority\tCompletion Time\tTurnaround Time\tWaiting Time");
+        System.out.println("Process\tPriority\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time");
 
-        for (PriorityProcess p : completedProcesses) {
-            System.out.println(p.processID + "\t" + p.arrivalTime + "\t\t" + p.burstTime + "\t\t" + p.priority + "\t\t" + p.completionTime + "\t\t" + p.turnAroundTime + "\t\t" + p.waitingTime);
+        for (PriorityProcess p : inputOrderProcesses) {
+            PriorityProcess completedProcess = completedProcesses.stream()
+                .filter(cp -> cp.processID.equals(p.processID))
+                .findFirst()
+                .orElse(null);
+            if (completedProcess != null) {
+                System.out.println(completedProcess.processID + "\t" + completedProcess.priority + "\t\t" + completedProcess.arrivalTime + "\t\t" + completedProcess.burstTime + "\t\t" + completedProcess.completionTime + "\t\t" + completedProcess.turnAroundTime + "\t\t" + completedProcess.waitingTime);
+            }
         }
 
         System.out.println("\nGantt Chart:");
@@ -113,5 +107,5 @@ public class NonPreemptivePriority {
         System.out.printf("Average Waiting Time: %.2f ms\n", avgWaitingTime);
         System.out.printf("CPU Utilization: %.2f%%\n", cpuUtilization);
     }
-}
 
+}

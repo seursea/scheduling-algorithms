@@ -2,7 +2,7 @@ import java.util.*;
 
 class Process {
     private final int id;
-    private final int arrivalTime;
+    final int arrivalTime;
     private final int burstTime;
     private int remainingTime;
     private int completionTime;

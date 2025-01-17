@@ -31,7 +31,7 @@ public class Scheduling {
             int n = getValidChoice(1, 10);
 
             // Arrays to store process details
-            String[] processID = new String[n];  // To store auto-incremented process IDs
+            String[] processID = new String[n]; // To store auto-incremented process IDs
             int[] arrivalTime = new int[n];
             int[] burstTime = new int[n];
             int[] priority = new int[n];
@@ -57,8 +57,8 @@ public class Scheduling {
             try {
                 switch (choice) {
                     case 1:
-                        // FCFS d2
-                        FCFS fcfs = new FCFS();
+                        // FCFS
+                        FCFSClass fcfs = new FCFSClass();
 
                         for (int i = 0; i < n; i++) {
                             fcfs.addProcess(arrivalTime[i], burstTime[i]);
@@ -70,9 +70,8 @@ public class Scheduling {
                         SJFClass sjf = new SJFClass();
 
                         // Add processes with the collected arrival times and burst times
-                        for (int i = 0; i 
-                        < n; i++) {
-                            sjf.addProcess(processID[i], arrivalTime[i], burstTime[i]);
+                        for (int i = 0; i < n; i++) {
+                            sjf.addProcess(arrivalTime[i], burstTime[i]);
                         }
 
                         // Execute the scheduling algorithm
@@ -80,7 +79,7 @@ public class Scheduling {
                         break;
                     case 3:
                         // srtf
-                        SRTF srtf = new SRTF();
+                        SRTFClass srtf = new SRTFClass();
 
                         for (int i = 0; i < n; i++) {
                             srtf.addProcess(arrivalTime[i], burstTime[i]);
@@ -88,15 +87,24 @@ public class Scheduling {
                         srtf.execute();
                         break;
                     case 4:
-                        System.out.println(""); // priority (non-preemptive) d2
+                        // Priority (Non-Preemptive) Scheduling
+                        NonPreemptivePriorityClass np = new NonPreemptivePriorityClass();
+
+                        // Add processes to Non-PreemptivePriority
+                        for (int i = 0; i < n; i++) {
+                            np.addProcess(priority[i], arrivalTime[i], burstTime[i]);
+                        }
+
+                        // Execute the scheduling algorithm
+                        np.execute();
                         break;
                     case 5:
                         // Priority (Preemptive) Scheduling
-                        PreemptivePriority pp = new PreemptivePriority();
+                        PreemptivePriorityClass pp = new PreemptivePriorityClass();
 
                         // Add processes to PreemptivePriority
                         for (int i = 0; i < n; i++) {
-                            pp.addProcess(arrivalTime[i], burstTime[i], priority[i]);
+                            pp.addProcess(priority[i], arrivalTime[i], burstTime[i]);
                         }
 
                         // Execute the scheduling algorithm

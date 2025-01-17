@@ -1,19 +1,19 @@
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class PreemptivePriority {
+public class PreemptivePriorityClass {
     private ArrayList<PriorityProcess> processes = new ArrayList<>();
     private ArrayList<PriorityProcess> readyQueue = new ArrayList<>();
     private ArrayList<PriorityProcess> completedProcesses = new ArrayList<>();
 
-    public void addProcess(String processID, int arrivalTime, int burstTime, int priority) {
-        PriorityProcess process = new PriorityProcess(processID, arrivalTime, burstTime, priority);
+    public void addProcess(String processID, int priority, int arrivalTime, int burstTime) {
+        PriorityProcess process = new PriorityProcess(processID, priority, arrivalTime, burstTime);
         processes.add(process);
     }
 
-    public void addProcess(int arrivalTime, int burstTime, int priority) {
+    public void addProcess(int priority, int arrivalTime, int burstTime) {
         String processID = String.valueOf((char) ('A' + processes.size()));
-        addProcess(processID, arrivalTime, burstTime, priority);
+        addProcess(processID, priority, arrivalTime, burstTime);
     }
 
     public void execute() {
@@ -96,7 +96,7 @@ public class PreemptivePriority {
 
     private void displayResults(int totalTurnaroundTime, int totalWaitingTime, int idleTime, int currentTime, StringBuilder ganttChartTop, StringBuilder ganttChartBottom, StringBuilder ganttChartTime, ArrayList<PriorityProcess> originalProcesses) {
         System.out.println("\nProcess Table:");
-        System.out.println("Process\tArrival Time\tBurst Time\tPriority\tCompletion Time\tTurnaround Time\tWaiting Time");
+        System.out.println("Process\tPriority\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time");
 
         // Display in the order of the original process IDs, not sorted by arrival time
         for (PriorityProcess p : originalProcesses) {
@@ -105,7 +105,7 @@ public class PreemptivePriority {
                 // Find the completed process in the completedProcesses list
                 for (PriorityProcess completedProcess : completedProcesses) {
                     if (completedProcess.processID.equals(p.processID)) {
-                        System.out.println(p.processID + "\t" + p.arrivalTime + "\t\t" + p.burstTime + "\t\t" + p.priority + "\t\t" + completedProcess.completionTime + "\t\t" + completedProcess.turnAroundTime + "\t\t" + completedProcess.waitingTime);
+                        System.out.println(p.processID + "\t" + p.priority + "\t\t" + p.arrivalTime + "\t\t" + p.burstTime + "\t\t" + completedProcess.completionTime + "\t\t" + completedProcess.turnAroundTime + "\t\t" + completedProcess.waitingTime);
                         break;
                     }
                 }
