@@ -28,10 +28,12 @@ public class SRTFClass {
     }
 
     public void addProcess(int arrivalTime, int burstTime) {
-        String processID = "P" + (processes.size() + 1);
-        addProcess(processID, arrivalTime, burstTime);
+        // Convert process number to letter (1->A, 2->B, etc.)
+        char processLetter = (char)('A' + processes.size());
+        addProcess(String.valueOf(processLetter), arrivalTime, burstTime);
     }
 
+    // Rest of the code remains exactly the same
     public void execute() {
         List<Process> sortedProcesses = new ArrayList<>(processes);
         sortedProcesses.sort(Comparator.comparingInt(p -> p.arrivalTime));
@@ -48,7 +50,7 @@ public class SRTFClass {
 
         List<String> ganttChart = new ArrayList<>();
         List<Integer> timeMarkers = new ArrayList<>();
-        boolean isIdle = true; // Track if the CPU is idle
+        boolean isIdle = true;
         
         while (complete != n) {
             for (int j = 0; j < n; j++) {
@@ -62,17 +64,17 @@ public class SRTFClass {
 
             if (!check) {
                 if (isIdle) {
-                    ganttChart.add("//"); // Mark idle time
-                    timeMarkers.add(currentTime); // Mark the start of idle time
-                    isIdle = false; // Mark CPU as idle
+                    ganttChart.add("//");
+                    timeMarkers.add(currentTime);
+                    isIdle = false;
                 }
                 currentTime++;
                 continue;
             }
 
             if (!isIdle) {
-                isIdle = true; // CPU starts processing
-                timeMarkers.add(currentTime); // Mark the end of idle time
+                isIdle = true;
+                timeMarkers.add(currentTime);
             }
 
             remainingTime[shortest]--;
@@ -96,13 +98,13 @@ public class SRTFClass {
                     || !ganttChart.get(ganttChart.size() - 1).equals(sortedProcesses.get(shortest).processID)) {
                 ganttChart.add(sortedProcesses.get(shortest).processID);
                 if (timeMarkers.isEmpty() || timeMarkers.get(timeMarkers.size() - 1) != currentTime) {
-                    timeMarkers.add(currentTime); // Add marker only if it is not already present
+                    timeMarkers.add(currentTime);
                 }
             }
 
             currentTime++;
         }
-        timeMarkers.add(currentTime); // Mark the final time
+        timeMarkers.add(currentTime);
 
         int totalWaitTime = 0, totalTurnAroundTime = 0, totalBurstTime = 0;
         for (Process p : sortedProcesses) {
@@ -123,7 +125,6 @@ public class SRTFClass {
         double avgTurnaroundTime = (double) totalTurnAroundTime / processes.size();
         double cpuUtilization = ((double) totalBurstTime / currentTime) * 100;
 
-        // Display process table
         System.out.println("\nProcess Table:");
         System.out.printf("%-12s %-14s %-10s %-16s %-18s %-14s\n",
                 "Process ID", "Arrival Time", "Burst Time",
@@ -135,36 +136,30 @@ public class SRTFClass {
                     p.completionTime, p.turnAroundTime, p.waitingTime);
         }
 
-        // Display metrics
         System.out.printf("\nAverage Waiting Time: %.2f ms\n", avgWaitTime);
         System.out.printf("Average Turnaround Time: %.2f ms\n", avgTurnaroundTime);
         System.out.printf("CPU Utilization: %.2f%%\n", cpuUtilization);
 
-        // Display Gantt chart
         System.out.println("\nGantt Chart:");
 
-        // Top border
         System.out.print("+");
         for (int i = 0; i < ganttChart.size(); i++) {
             System.out.print("--------+");
         }
         System.out.println();
 
-        // Process IDs
         System.out.print("|");
         for (String process : ganttChart) {
             System.out.printf(" %-6s |", process);
         }
         System.out.println();
 
-        // Bottom border
         System.out.print("+");
         for (int i = 0; i < ganttChart.size(); i++) {
             System.out.print("--------+");
         }
         System.out.println();
 
-        // Time markers
         for (Integer time : timeMarkers) {
             System.out.printf("%-9d", time);
         }
