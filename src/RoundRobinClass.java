@@ -1,218 +1,180 @@
 import java.util.*;
 
-class Process {
-    private final int id;
-    private final int arrivalTime;
-    private final int burstTime;
-    private int remainingTime;
-    private int completionTime;
-    private int turnaroundTime;
-    private int waitingTime;
-
-    public Process(int id, int arrivalTime, int burstTime) {
-        this.id = id;
-        this.arrivalTime = arrivalTime;
-        this.burstTime = burstTime;
-        this.remainingTime = burstTime;
-    }
-
-    // getters
-    public int getId() {
-        return id;
-    }
-
-    public int getArrivalTime() {
-        return arrivalTime;
-    }
-
-    public int getBurstTime() {
-        return burstTime;
-    }
-
-    public int getRemainingTime() {
-        return remainingTime;
-    }
-
-    public int getCompletionTime() {
-        return completionTime;
-    }
-
-    public int getTurnaroundTime() {
-        return turnaroundTime;
-    }
-
-    public int getWaitingTime() {
-        return waitingTime;
-    }
-
-    public void setRemainingTime(int remainingTime) {
-        this.remainingTime = remainingTime;
-    }
-
-    public void setCompletionTime(int completionTime) {
-        this.completionTime = completionTime;
-        calculateTimes();
-    }
-
-    private void calculateTimes() {
-        this.turnaroundTime = this.completionTime - this.arrivalTime;
-        this.waitingTime = this.turnaroundTime - this.burstTime;
-    }
-
-    public boolean isCompleted() {
-        return remainingTime <= 0;
-    }
-}
-
 public class RoundRobinClass {
-    private final List<Process> processes;
+    private List<Process> processes;
     private final int timeQuantum;
-    private final List<GanttChartEntry> ganttChart;
-
-    private static class GanttChartEntry {
-        String processId;
-        int startTime;
-        int endTime;
-
-        GanttChartEntry(String processId, int startTime, int endTime) {
-            this.processId = processId;
-            this.startTime = startTime;
-            this.endTime = endTime;
-        }
-    }
 
     public RoundRobinClass(int timeQuantum) {
         this.processes = new ArrayList<>();
         this.timeQuantum = timeQuantum;
-        this.ganttChart = new ArrayList<>();
     }
 
     public void addProcess(int arrivalTime, int burstTime) {
-        processes.add(new Process(processes.size() + 1, arrivalTime, burstTime));
+        String processID = String.valueOf((char)('A' + processes.size())); // Generate names like A, B, C
+        addProcess(processID, arrivalTime, burstTime);
     }
 
-    public void schedule() {
+    public void addProcess(String processID, int arrivalTime, int burstTime) {
+        processes.add(new Process(processID, arrivalTime, burstTime));
+    }
+
+    public void execute() {
         if (processes.isEmpty()) {
             System.out.println("No processes to schedule!");
             return;
         }
 
+        // Create copies of processes for scheduling
+        List<Process> remainingProcesses = new ArrayList<>();
+        for (Process p : processes) {
+            remainingProcesses.add(new Process(p.processID, p.arrivalTime, p.burstTime));
+        }
+        
+        // Sort by arrival time
+        remainingProcesses.sort(Comparator.comparingInt(p -> p.arrivalTime));
+
         Queue<Process> readyQueue = new LinkedList<>();
-        List<Process> notArrived = new ArrayList<>(processes);
-        // sort by arrival time
-        notArrived.sort(Comparator.comparingInt(Process::getArrivalTime));
-
+        List<String> ganttChart = new ArrayList<>();
+        List<Integer> timeMarkers = new ArrayList<>();
+        
         int currentTime = 0;
-        int completedProcesses = 0;
-        Process currentProcess = null;
-        int remainingQuantum = 0;
-
-        while (completedProcesses < processes.size()) {
-            // check for newly arrived processes
-            while (!notArrived.isEmpty() && notArrived.get(0).getArrivalTime() <= currentTime) {
-                readyQueue.offer(notArrived.remove(0));
-            }
-
-            // if no current process, get next from ready queue
-            if (currentProcess == null) {
-                // if ready queue is empty but processes haven't arrived yet
-                if (readyQueue.isEmpty()) {
-                    if (!notArrived.isEmpty()) {
-                        // add idle time in gantt chart
-                        ganttChart.add(new GanttChartEntry("IDLE",
-                                currentTime,
-                                notArrived.get(0).getArrivalTime()));
-                        currentTime = notArrived.get(0).getArrivalTime();
-                        continue;
-                    }
-                } else {
-                    currentProcess = readyQueue.poll();
-                    remainingQuantum = timeQuantum;
-                }
-            }
-
-            if (currentProcess != null) {
-                int executeTime = Math.min(remainingQuantum, currentProcess.getRemainingTime());
-
-                // add to gantt chart
-                ganttChart.add(new GanttChartEntry(
-                        "P" + currentProcess.getId(),
-                        currentTime,
-                        currentTime + executeTime));
-
-                currentTime += executeTime;
-                currentProcess.setRemainingTime(currentProcess.getRemainingTime() - executeTime);
-                remainingQuantum -= executeTime;
-
-                // check if process completed or quantum expired
-                if (currentProcess.isCompleted()) {
-                    currentProcess.setCompletionTime(currentTime);
-                    completedProcesses++;
-                    currentProcess = null;
-                } else if (remainingQuantum == 0) {
-                    // add back to ready queue if quantum expired
-                    while (!notArrived.isEmpty() &&
-                            notArrived.get(0).getArrivalTime() <= currentTime) {
-                        readyQueue.offer(notArrived.remove(0));
-                    }
-                    readyQueue.offer(currentProcess);
-                    currentProcess = null;
-                }
-            }
+        int[] remainingBurstTime = new int[processes.size()];
+        boolean[] completed = new boolean[processes.size()];
+        
+        // Initialize remaining burst times
+        for (int i = 0; i < processes.size(); i++) {
+            remainingBurstTime[i] = processes.get(i).burstTime;
         }
 
-        displayResults();
+        timeMarkers.add(currentTime);
+        
+        while (true) {
+            boolean allCompleted = true;
+            
+            // Check for newly arrived processes
+            while (!remainingProcesses.isEmpty() && remainingProcesses.get(0).arrivalTime <= currentTime) {
+                Process arrived = remainingProcesses.remove(0);
+                readyQueue.offer(arrived);
+            }
+            
+            // If ready queue is empty but processes haven't arrived yet
+            if (readyQueue.isEmpty() && !remainingProcesses.isEmpty()) {
+                ganttChart.add("//");
+                currentTime = remainingProcesses.get(0).arrivalTime;
+                timeMarkers.add(currentTime);
+                continue;
+            }
+            
+            // Process the ready queue
+            if (!readyQueue.isEmpty()) {
+                Process current = readyQueue.poll();
+                int index = getProcessIndex(current.processID);
+                
+                // Set start time if not set
+                if (current.startTime == 0 && !completed[index]) {
+                    current.startTime = currentTime;
+                }
+                
+                int executeTime = Math.min(timeQuantum, remainingBurstTime[index]);
+                remainingBurstTime[index] -= executeTime;
+                currentTime += executeTime;
+                
+                ganttChart.add(current.processID);
+                timeMarkers.add(currentTime);
+                
+                // Check if process is completed
+                if (remainingBurstTime[index] == 0 && !completed[index]) {
+                    completed[index] = true;
+                    processes.get(index).completionTime = currentTime;
+                    processes.get(index).turnAroundTime = currentTime - processes.get(index).arrivalTime;
+                    processes.get(index).waitingTime = processes.get(index).turnAroundTime - processes.get(index).burstTime;
+                } else if (remainingBurstTime[index] > 0) {
+                    // If process is not completed, add back to ready queue
+                    readyQueue.offer(current);
+                }
+            }
+            
+            // Check if all processes are completed
+            for (boolean isCompleted : completed) {
+                if (!isCompleted) {
+                    allCompleted = false;
+                    break;
+                }
+            }
+            
+            if (allCompleted) break;
+        }
+        
+        displayResults(ganttChart, timeMarkers);
+    }
+    
+    private int getProcessIndex(String processID) {
+        for (int i = 0; i < processes.size(); i++) {
+            if (processes.get(i).processID.equals(processID)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
-    // display results
-    private void displayResults() {
-        System.out.println("\nProcess Details:");
-        System.out.println("Process\tAT\tBT\tCT\tTAT\tWT");
-        System.out.println("----------------------------------------");
-
-        double totalTurnaround = 0;
-        double totalWaiting = 0;
-
-        List<Process> sortedProcesses = new ArrayList<>(processes);
-        sortedProcesses.sort(Comparator.comparingInt(Process::getId));
-
-        for (Process p : sortedProcesses) {
-            System.out.printf("P%d\t%d\t%d\t%d\t%d\t%d\n",
-                    p.getId(), p.getArrivalTime(), p.getBurstTime(),
-                    p.getCompletionTime(), p.getTurnaroundTime(),
-                    p.getWaitingTime());
-
-            totalTurnaround += p.getTurnaroundTime();
-            totalWaiting += p.getWaitingTime();
+    private void displayResults(List<String> ganttChart, List<Integer> timeMarkers) {
+        System.out.println("\nProcess Table:");
+        System.out.println("Process\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time");
+        
+        int totalTurnaroundTime = 0;
+        int totalWaitingTime = 0;
+        int totalBurstTime = 0;
+        
+        for (Process p : processes) {
+            System.out.println(p.processID + "\t" + p.arrivalTime + "\t\t" + 
+                             p.burstTime + "\t\t" + p.completionTime + "\t\t" + 
+                             p.turnAroundTime + "\t\t" + p.waitingTime);
+            
+            totalTurnaroundTime += p.turnAroundTime;
+            totalWaitingTime += p.waitingTime;
+            totalBurstTime += p.burstTime;
         }
-
-        // display averages
-        int n = processes.size();
-        System.out.printf("\nAverage Turnaround Time: %.2f ms\n", totalTurnaround / n);
-        System.out.printf("Average Waiting Time: %.2f ms\n", totalWaiting / n);
-
-        // display gantt chart
+        
+        // Display Gantt chart
         System.out.println("\nGantt Chart:");
+        
+        // Top border
+        System.out.print("+");
+        for (int i = 0; i < ganttChart.size(); i++) {
+            System.out.print("--------+");
+        }
+        System.out.println();
+        
+        // Process IDs
         System.out.print("|");
-        for (GanttChartEntry entry : ganttChart) {
-            System.out.printf(" %-4s |", entry.processId);
+        for (String process : ganttChart) {
+            System.out.printf(" %-6s |", process);
         }
-        System.out.println("\n");
-
-        // print timeline
-        for (GanttChartEntry entry : ganttChart) {
-            System.out.printf("%-6d", entry.startTime);
+        System.out.println();
+        
+        // Bottom border
+        System.out.print("+");
+        for (int i = 0; i < ganttChart.size(); i++) {
+            System.out.print("--------+");
         }
-        System.out.printf("%-6d\n", ganttChart.get(ganttChart.size() - 1).endTime);
+        System.out.println();
+        
+        // Time markers
+        for (Integer time : timeMarkers) {
+            System.out.printf("%-9d", time);
+        }
+        System.out.println();
 
-        // calculate cpu utilization
-        int totalTime = ganttChart.get(ganttChart.size() - 1).endTime;
-        int idleTime = ganttChart.stream()
-                .filter(entry -> entry.processId.equals("IDLE"))
-                .mapToInt(entry -> entry.endTime - entry.startTime)
-                .sum();
+        // Calculate and display averages
+        double avgTurnaroundTime = (double) totalTurnaroundTime / processes.size();
+        double avgWaitingTime = (double) totalWaitingTime / processes.size();
+        
+        // Calculate CPU utilization (excluding idle time)
+        int totalTime = timeMarkers.get(timeMarkers.size() - 1);
+        double cpuUtilization = ((double) totalBurstTime / totalTime) * 100;
 
-        double cpuUtilization = ((double) (totalTime - idleTime) / totalTime) * 100;
-        System.out.printf("\nCPU Utilization: %.2f%%\n", cpuUtilization);
+        System.out.printf("\nAverage Turnaround Time: %.2f ms\n", avgTurnaroundTime);
+        System.out.printf("Average Waiting Time: %.2f ms\n", avgWaitingTime);
+        System.out.printf("CPU Utilization: %.2f%%\n", cpuUtilization);
     }
 }

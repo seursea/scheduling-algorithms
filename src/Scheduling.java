@@ -26,18 +26,20 @@ public class Scheduling {
                 continue;
             }
 
-            // get number of processes
+            // Get number of processes
             System.out.print("\nEnter number of processes (1-10): ");
             int n = getValidChoice(1, 10);
 
-            // arrays to store process details
+            // Arrays to store process details
+            String[] processID = new String[n]; // To store auto-incremented process IDs
             int[] arrivalTime = new int[n];
             int[] burstTime = new int[n];
             int[] priority = new int[n];
 
-            // input process details
+            // Automatically assign process names (A, B, C, ...)
             for (int i = 0; i < n; i++) {
-                System.out.println("\nProcess " + (i + 1) + ":");
+                processID[i] = String.valueOf((char) ('A' + i)); // Assigning 'A', 'B', 'C', ...
+                System.out.println("\nProcess " + processID[i] + ":");
                 System.out.print("Arrival Time: ");
                 arrivalTime[i] = getValidNonNegativeInput();
                 System.out.print("Burst Time: ");
@@ -49,12 +51,14 @@ public class Scheduling {
                 }
             }
 
+            System.out.println();
+
             // process the selected algorithm
             try {
                 switch (choice) {
                     case 1:
-                        // FCFS d2
-                        FCFS fcfs = new FCFS();
+                        // FCFS
+                        FCFSClass fcfs = new FCFSClass();
 
                         for (int i = 0; i < n; i++) {
                             fcfs.addProcess(arrivalTime[i], burstTime[i]);
@@ -63,11 +67,19 @@ public class Scheduling {
                         fcfs.execute();
                         break;
                     case 2:
-                        System.out.println(""); // SJF d2
+                        SJFClass sjf = new SJFClass();
+
+                        // Add processes with the collected arrival times and burst times
+                        for (int i = 0; i < n; i++) {
+                            sjf.addProcess(arrivalTime[i], burstTime[i]);
+                        }
+
+                        // Execute the scheduling algorithm
+                        sjf.execute();
                         break;
                     case 3:
                         // srtf
-                        SRTF srtf = new SRTF();
+                        SRTFClass srtf = new SRTFClass();
 
                         for (int i = 0; i < n; i++) {
                             srtf.addProcess(arrivalTime[i], burstTime[i]);
@@ -75,15 +87,24 @@ public class Scheduling {
                         srtf.execute();
                         break;
                     case 4:
-                        System.out.println(""); // priority (non-preemptive) d2
+                        // Priority (Non-Preemptive) Scheduling
+                        NonPreemptivePriorityClass np = new NonPreemptivePriorityClass();
+
+                        // Add processes to Non-PreemptivePriority
+                        for (int i = 0; i < n; i++) {
+                            np.addProcess(priority[i], arrivalTime[i], burstTime[i]);
+                        }
+
+                        // Execute the scheduling algorithm
+                        np.execute();
                         break;
                     case 5:
                         // Priority (Preemptive) Scheduling
-                        PreemptivePriority pp = new PreemptivePriority();
+                        PreemptivePriorityClass pp = new PreemptivePriorityClass();
 
                         // Add processes to PreemptivePriority
                         for (int i = 0; i < n; i++) {
-                            pp.addProcess(arrivalTime[i], burstTime[i], priority[i]);
+                            pp.addProcess(priority[i], arrivalTime[i], burstTime[i]);
                         }
 
                         // Execute the scheduling algorithm
@@ -100,25 +121,25 @@ public class Scheduling {
                         }
 
                         // call the correct method name
-                        rr.schedule();
+                        rr.execute();
                         break;
                 }
             } catch (Exception e) {
                 System.out.println("\nAn error occurred: " + e.getMessage());
             }
 
-            // ask if user wants to continue
+            // Ask if user wants to continue
             System.out.print("\nDo you want to try another scheduling algorithm? (y/n): ");
             String response = scanner.next().trim().toLowerCase();
             if (response.equals("n")) {
-                System.out.println("\nThank you for using the CPU Scheduling Program!");
+                System.out.println("\nThank you for using our CPU Scheduling Program!");
                 continueProgram = false;
             }
         }
         scanner.close();
     }
 
-    // helper method to get valid choice within a range
+    // Helper method to get valid choice within a range
     private static int getValidChoice(int min, int max) {
         int choice;
         while (true) {
@@ -131,12 +152,12 @@ public class Scheduling {
                 }
             } catch (java.util.InputMismatchException e) {
                 System.out.print("Invalid input. Please enter a number between " + min + " and " + max + ": ");
-                scanner.next(); // clear invalid input
+                scanner.next(); // Clear invalid input
             }
         }
     }
 
-    // helper method to get valid non-negative input
+    // Helper method to get valid non-negative input
     private static int getValidNonNegativeInput() {
         int input;
         while (true) {
@@ -149,12 +170,12 @@ public class Scheduling {
                 }
             } catch (java.util.InputMismatchException e) {
                 System.out.print("Invalid input. Please enter a non-negative number: ");
-                scanner.next(); // clear invalid input
+                scanner.next(); // Clear invalid input
             }
         }
     }
 
-    // helper method to get valid positive input
+    // Helper method to get valid positive input
     private static int getValidPositiveInput() {
         int input;
         while (true) {
@@ -167,7 +188,7 @@ public class Scheduling {
                 }
             } catch (java.util.InputMismatchException e) {
                 System.out.print("Invalid input. Please enter a positive number: ");
-                scanner.next(); // clear invalid input
+                scanner.next(); // Clear invalid input
             }
         }
     }
