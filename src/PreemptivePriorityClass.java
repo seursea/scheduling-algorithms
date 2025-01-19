@@ -33,7 +33,7 @@ public class PreemptivePriorityClass {
         StringBuilder ganttChartTime = new StringBuilder();
     
         String lastProcessID = null; // Tracks the last process added to the Gantt chart
-    
+
         // Initialize Gantt chart time with the start time (0)
         ganttChartTime.append(String.format("%5d ", currentTime));
     

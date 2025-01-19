@@ -5,8 +5,7 @@ public class NonPreemptivePriorityClass {
     private ArrayList<PriorityProcess> processes = new ArrayList<>(); // List to hold all processes
     private ArrayList<PriorityProcess> completedProcesses = new ArrayList<>(); // List to hold completed processes
 
-    // Method to add a process with a specific ID, priority, arrival time, and burst
-    // time
+    // Method to add a process with a specific ID, priority, arrival time, and burst time
     public void addProcess(String processID, int priority, int arrivalTime, int burstTime) {
         PriorityProcess process = new PriorityProcess(processID, priority, arrivalTime, burstTime);
         processes.add(process); // Add process to the list of processes

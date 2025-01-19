@@ -168,7 +168,7 @@ public class RoundRobinClass {
         // Calculate and display averages
         double avgTurnaroundTime = (double) totalTurnaroundTime / processes.size();
         double avgWaitingTime = (double) totalWaitingTime / processes.size();
-        
+    
         // Calculate CPU utilization (excluding idle time)
         int totalTime = timeMarkers.get(timeMarkers.size() - 1);
         double cpuUtilization = ((double) totalBurstTime / totalTime) * 100;

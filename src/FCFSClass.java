@@ -28,8 +28,9 @@ public class FCFSClass {
     }
 
     public void addProcess(int arrivalTime, int burstTime) {
-        String processID = "P" + (processes.size() + 1);
-        addProcess(processID, arrivalTime, burstTime);
+        // Convert process number to letter (A, B, C, ...)
+        char processLetter = (char)('A' + processes.size());
+        addProcess(String.valueOf(processLetter), arrivalTime, burstTime);
     }
 
     public void execute() {
@@ -51,7 +52,7 @@ public class FCFSClass {
                 timeMarkers.add(p.arrivalTime);
                 currentTime = p.arrivalTime;
             }
-
+                
             ganttChart.add(p.processID);
             p.completionTime = currentTime + p.burstTime;
             p.turnAroundTime = p.completionTime - p.arrivalTime;
@@ -66,8 +67,12 @@ public class FCFSClass {
 
         double avgWaitTime = (double) totalWaitTime / processes.size();
         double avgTurnaroundTime = (double) totalTurnAroundTime / processes.size();
-        double cpuUtilization = ((double) (currentTime
-                - processes.stream().mapToInt(p -> p.arrivalTime).min().orElse(0)) / currentTime) * 100;
+        
+        // Modified CPU utilization calculation
+        int totalBurstTime = processes.stream()
+                                    .mapToInt(p -> p.burstTime)
+                                    .sum();
+        double cpuUtilization = ((double) totalBurstTime / currentTime) * 100;
 
         displayResults(avgWaitTime, avgTurnaroundTime, cpuUtilization, ganttChart, timeMarkers);
     }
@@ -120,16 +125,5 @@ public class FCFSClass {
             System.out.printf("%-9d", time);
         }
         System.out.println();
-    }
-
-    public static void main(String[] args) {
-        FCFSClass scheduler = new FCFSClass();
-
-        // Example usage
-        scheduler.addProcess(0, 4);
-        scheduler.addProcess(1, 3);
-        scheduler.addProcess(2, 1);
-
-        scheduler.execute();
     }
 }

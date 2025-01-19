@@ -3,7 +3,7 @@ public class PriorityProcess {
     
     // Process ID (e.g., "A", "B", "C", etc.)
     String processID;
-    
+
     // Arrival time of the process (the time the process enters the ready queue)
     int arrivalTime;
     

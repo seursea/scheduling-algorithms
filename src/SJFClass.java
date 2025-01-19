@@ -121,7 +121,7 @@ public class SJFClass {
         double avgTurnaroundTime = (double) totalTurnaroundTime / processes.size();
         double avgWaitingTime = (double) totalWaitingTime / processes.size();
         double cpuUtilization = ((currentTime - idleTime) / (double) currentTime) * 100;
-
+        
         System.out.printf("\nAverage Turnaround Time: %.2f ms\n", avgTurnaroundTime);
         System.out.printf("Average Waiting Time: %.2f ms\n", avgWaitingTime);
         System.out.printf("CPU Utilization: %.2f%%\n", cpuUtilization);

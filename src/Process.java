@@ -6,7 +6,7 @@ public class Process {
    
    // Arrival time of the process (the time the process enters the ready queue)
    public int arrivalTime;
-   
+
    // Burst time (CPU time required for the process to complete)
    public int burstTime;
    

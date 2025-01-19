@@ -19,7 +19,7 @@ public class Scheduling {
 
             System.out.print("\nEnter your choice (0-6): ");
             int choice = getValidChoice(0, 6);
-
+            
             if (choice == 0) {
                 System.out.println("\nThank you for using the CPU Scheduling Program!");
                 continueProgram = false;
