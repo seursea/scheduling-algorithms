@@ -1,3 +1,10 @@
+// CODED BY: Group 1 from BSCS 3-2
+// - Ambagan, Trizia Lorenz
+// - Dumaop, Jossel John
+// - Opeña, Michelle Eunice
+// - Pasacsac, Jan Patrice
+// - Santua, Aldrei Justin
+
 import java.util.*;
 
 public class Scheduling {
@@ -57,16 +64,18 @@ public class Scheduling {
             try {
                 switch (choice) {
                     case 1:
-                        // FCFS
+                        // First Come First Serve
                         FCFSClass fcfs = new FCFSClass();
 
                         for (int i = 0; i < n; i++) {
                             fcfs.addProcess(arrivalTime[i], burstTime[i]);
                         }
 
+                        // Execute the FCFS
                         fcfs.execute();
                         break;
                     case 2:
+                        // Shortest Job First
                         SJFClass sjf = new SJFClass();
 
                         // Add processes with the collected arrival times and burst times
@@ -74,16 +83,18 @@ public class Scheduling {
                             sjf.addProcess(arrivalTime[i], burstTime[i]);
                         }
 
-                        // Execute the scheduling algorithm
+                        // Execute the SJF
                         sjf.execute();
                         break;
                     case 3:
-                        // srtf
+                        // Shortest Remaining Time First
                         SRTFClass srtf = new SRTFClass();
 
                         for (int i = 0; i < n; i++) {
                             srtf.addProcess(arrivalTime[i], burstTime[i]);
                         }
+
+                        // Execute the SRTF
                         srtf.execute();
                         break;
                     case 4:
@@ -95,7 +106,7 @@ public class Scheduling {
                             np.addProcess(priority[i], arrivalTime[i], burstTime[i]);
                         }
 
-                        // Execute the scheduling algorithm
+                        // Execute the Non-Preemptive Priority
                         np.execute();
                         break;
                     case 5:
@@ -107,10 +118,11 @@ public class Scheduling {
                             pp.addProcess(priority[i], arrivalTime[i], burstTime[i]);
                         }
 
-                        // Execute the scheduling algorithm
+                        // Execute the Preemptive Priority
                         pp.execute();
                         break;
                     case 6:
+                        // Round Robin
                         System.out.print("\nEnter Time Quantum (positive integer): ");
                         int timeQuantum = getValidPositiveInput();
                         RoundRobinClass rr = new RoundRobinClass(timeQuantum);
@@ -120,7 +132,7 @@ public class Scheduling {
                             rr.addProcess(arrivalTime[i], burstTime[i]);
                         }
 
-                        // call the correct method name
+                        // Execute the Round Robin
                         rr.execute();
                         break;
                 }

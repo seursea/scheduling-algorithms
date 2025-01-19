@@ -1,3 +1,4 @@
+// Coded by: Aldrei Justin Santua
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -70,16 +71,6 @@ public class SJFClass {
 
                 // Move the current time forward
                 currentTime = shortest.completionTime;
-
-                // Print the process details for debugging or display
-                System.out.println("Process ID: " + shortest.processID);
-                System.out.println("Arrival Time: " + shortest.arrivalTime);
-                System.out.println("Burst Time: " + shortest.burstTime);
-                System.out.println("Start Time: " + shortest.startTime);
-                System.out.println("Completion Time: " + shortest.completionTime);
-                System.out.println("Turnaround Time: " + shortest.turnAroundTime);
-                System.out.println("Waiting Time: " + shortest.waitingTime);
-                System.out.println("-------------------------");
 
             } else {
                 // If no process is ready, update idle time and wait for the next process to arrive

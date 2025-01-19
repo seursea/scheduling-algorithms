@@ -1,43 +1,22 @@
-// The PriorityProcess class represents a process in a priority-based scheduling algorithm
 public class PriorityProcess {
-    
-    // Process ID (e.g., "A", "B", "C", etc.)
-    String processID;
 
-    // Arrival time of the process (the time the process enters the ready queue)
-    int arrivalTime;
-    
-    // Burst time (CPU time required for the process to complete)
-    int burstTime;
-    
-    // Priority of the process (used for priority scheduling)
-    // Lower values typically represent higher priority
-    int priority;
-    
-    // Remaining time of the process (used for preemptive scheduling to track execution)
-    int remainingTime;
-    
-    // Start time of the process (the time when the process begins execution)
-    // Initialized to -1 to indicate it hasn't started yet
-    int startTime = -1;
-    
-    // Completion time (the time when the process finishes execution)
-    int completionTime;
-    
-    // Turnaround time (the total time the process spends in the system)
-    // Turnaround Time = Completion Time - Arrival Time
-    int turnAroundTime;
-    
-    // Waiting time (the total time the process spends waiting in the ready queue)
-    // Waiting Time = Turnaround Time - Burst Time
-    int waitingTime;
+    // Process attributes
+    String processID;      // Unique identifier for the process
+    int arrivalTime;       // Time when the process arrives in the ready queue
+    int burstTime;         // Total CPU time needed to complete the process
+    int priority;          // Priority of the process (lower value means higher priority)
+    int remainingTime;     // Remaining time to complete the process (used in preemptive scheduling)
+    int startTime = -1;    // Start time of the process (default -1 means not yet started)
+    int completionTime;    // Time when the process completes execution
+    int turnAroundTime;    // Time spent in the system (completionTime - arrivalTime)
+    int waitingTime;       // Time spent waiting in the ready queue (turnAroundTime - burstTime)
 
-    // Constructor to initialize a new PriorityProcess with given values
+    // Constructor to initialize the process with its values
     public PriorityProcess(String processID, int priority, int arrivalTime, int burstTime) {
-        this.processID = processID;    // Set the process ID
-        this.priority = priority;      // Set the priority of the process
-        this.arrivalTime = arrivalTime; // Set the arrival time
-        this.burstTime = burstTime;     // Set the burst time
-        this.remainingTime = burstTime; // Initialize remaining time to burst time (for preemptive scheduling)
+        this.processID = processID;        // Set the process identifier
+        this.priority = priority;          // Set the priority level
+        this.arrivalTime = arrivalTime;    // Set the arrival time
+        this.burstTime = burstTime;        // Set the burst time
+        this.remainingTime = burstTime;    // Initialize remaining time to burst time
     }
 }

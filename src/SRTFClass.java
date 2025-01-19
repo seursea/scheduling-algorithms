@@ -1,20 +1,5 @@
+// Coded by: Jan Patrice Pasacsac
 import java.util.*;
-
-class Process {
-    String processID;
-    int arrivalTime;
-    int burstTime;
-    int completionTime;
-    int turnAroundTime;
-    int waitingTime;
-    public int startTime;
-
-    public Process(String processID, int arrivalTime, int burstTime) {
-        this.processID = processID;
-        this.arrivalTime = arrivalTime;
-        this.burstTime = burstTime;
-    }
-}
 
 public class SRTFClass {
     private List<Process> processes;
@@ -23,18 +8,21 @@ public class SRTFClass {
         this.processes = new ArrayList<>();
     }
 
+    // Method to add a process using process ID, arrival time, and burst time
     public void addProcess(String processID, int arrivalTime, int burstTime) {
         processes.add(new Process(processID, arrivalTime, burstTime));
     }
 
+    // Method to add a process using only arrival time and burst time
     public void addProcess(int arrivalTime, int burstTime) {
         // Convert process number to letter (1->A, 2->B, etc.)
         char processLetter = (char)('A' + processes.size());
         addProcess(String.valueOf(processLetter), arrivalTime, burstTime);
     }
 
-    // Rest of the code remains exactly the same
+    // Executes the Shortest Remaining Time First (SRTF) algorithm
     public void execute() {
+        // Sort processes by their arrival times
         List<Process> sortedProcesses = new ArrayList<>(processes);
         sortedProcesses.sort(Comparator.comparingInt(p -> p.arrivalTime));
 
@@ -44,6 +32,7 @@ public class SRTFClass {
             remainingTime[i] = sortedProcesses.get(i).burstTime;
         }
 
+        // Initialize variables to keep track of the current state
         int complete = 0, currentTime = 0, minTime = Integer.MAX_VALUE;
         int shortest = 0, finishTime;
         boolean check = false;
@@ -51,8 +40,10 @@ public class SRTFClass {
         List<String> ganttChart = new ArrayList<>();
         List<Integer> timeMarkers = new ArrayList<>();
         boolean isIdle = true;
-        
+
+        // Main loop to schedule the processes
         while (complete != n) {
+            // Check if a new process has arrived and if it has the shortest remaining time
             for (int j = 0; j < n; j++) {
                 if ((sortedProcesses.get(j).arrivalTime <= currentTime) &&
                         (remainingTime[j] < minTime) && remainingTime[j] > 0) {
@@ -62,6 +53,7 @@ public class SRTFClass {
                 }
             }
 
+            // If no process is ready, increment the current time
             if (!check) {
                 if (isIdle) {
                     ganttChart.add("//");
@@ -72,17 +64,20 @@ public class SRTFClass {
                 continue;
             }
 
+            // Record the first process execution time
             if (!isIdle) {
                 isIdle = true;
                 timeMarkers.add(currentTime);
             }
 
+            // Decrease the remaining time for the shortest process
             remainingTime[shortest]--;
             minTime = remainingTime[shortest];
             if (minTime == 0) {
                 minTime = Integer.MAX_VALUE;
             }
 
+            // If process is completed, calculate its times and mark it as complete
             if (remainingTime[shortest] == 0) {
                 complete++;
                 check = false;
@@ -94,6 +89,7 @@ public class SRTFClass {
                         - sortedProcesses.get(shortest).burstTime;
             }
 
+            // Update the Gantt chart with the current process ID
             if (ganttChart.isEmpty()
                     || !ganttChart.get(ganttChart.size() - 1).equals(sortedProcesses.get(shortest).processID)) {
                 ganttChart.add(sortedProcesses.get(shortest).processID);
@@ -104,8 +100,11 @@ public class SRTFClass {
 
             currentTime++;
         }
+
+        // Add the final time marker
         timeMarkers.add(currentTime);
 
+        // Calculate total times for all processes
         int totalWaitTime = 0, totalTurnAroundTime = 0, totalBurstTime = 0;
         for (Process p : sortedProcesses) {
             totalWaitTime += p.waitingTime;
@@ -113,18 +112,22 @@ public class SRTFClass {
             totalBurstTime += p.burstTime;
         }
 
+        // Display the results
         displayResults(totalWaitTime, totalTurnAroundTime, totalBurstTime, currentTime,
                 sortedProcesses, ganttChart, timeMarkers);
     }
 
+    // Method to display the results
     private void displayResults(int totalWaitTime, int totalTurnAroundTime, int totalBurstTime,
             int currentTime, List<Process> sortedProcesses,
             List<String> ganttChart, List<Integer> timeMarkers) {
 
+        // Calculate averages and CPU utilization
         double avgWaitTime = (double) totalWaitTime / processes.size();
         double avgTurnaroundTime = (double) totalTurnAroundTime / processes.size();
         double cpuUtilization = ((double) totalBurstTime / currentTime) * 100;
 
+        // Print process table
         System.out.println("\nProcess Table:");
         System.out.printf("%-12s %-14s %-10s %-16s %-18s %-14s\n",
                 "Process ID", "Arrival Time", "Burst Time",
@@ -136,12 +139,13 @@ public class SRTFClass {
                     p.completionTime, p.turnAroundTime, p.waitingTime);
         }
 
+        // Print average times and CPU utilization
         System.out.printf("\nAverage Waiting Time: %.2f ms\n", avgWaitTime);
         System.out.printf("Average Turnaround Time: %.2f ms\n", avgTurnaroundTime);
         System.out.printf("CPU Utilization: %.2f%%\n", cpuUtilization);
 
+        // Print Gantt chart
         System.out.println("\nGantt Chart:");
-
         System.out.print("+");
         for (int i = 0; i < ganttChart.size(); i++) {
             System.out.print("--------+");
